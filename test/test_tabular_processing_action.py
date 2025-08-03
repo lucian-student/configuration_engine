@@ -1,4 +1,4 @@
-from fixtures.dataframes import test_dataframe, state_category, categorical_dataframe
+from test.fixtures.dataframes import test_dataframe, state_category, categorical_dataframe
 from configuration_engine.processing_action.tabular_processing_action import (
     DropColumn,
     ChangeCategory,
