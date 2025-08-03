@@ -48,4 +48,4 @@ torch = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["configuration_engine"]
+where = ["src"]
