@@ -1,6 +1,6 @@
 [project]
 name = "configuration_engine"
-version = "0.1.0"
+version = "0.2.0"
 description = "Configuration engine for machine learning"
 readme = "README.md"
 license = { text = "MIT" }
@@ -46,3 +46,6 @@ dependencies = [
 torch = [
     "torch>=2.1.0"
 ]
+
+[tool.setuptools.packages.find]
+where = ["configuration_engine"]
