@@ -1,5 +1,5 @@
 from configuration_engine.configuration.training_schema import TrainingSchema
-from configuration_engine.configuration.tabular_schema import TabularSchema
+from configuration_engine.configuration.pandas.tabular_schema import TabularSchema
 import pandas as pd
 import yaml
 

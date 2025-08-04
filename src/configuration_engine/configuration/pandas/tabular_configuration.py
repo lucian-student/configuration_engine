@@ -1,7 +1,7 @@
 from typing import List, Any, Dict, Optional, Tuple
 from configuration_engine.datasets import PandasDataset
 from configuration_engine.parameter import Parameter, NontunableParameter
-from configuration_engine.processing_action import TabularProcessingAction
+from configuration_engine.processing_action.pandas import TabularProcessingAction
 from configuration_engine.configuration.metadata import Metadata
 import optuna
 import pandas as pd

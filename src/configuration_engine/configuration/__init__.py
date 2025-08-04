@@ -1,7 +1,3 @@
-from configuration_engine.configuration.tabular_configuration import (
-    TabularConfiguration,
-)
-from configuration_engine.configuration.tabular_schema import TabularSchema
+
 from configuration_engine.configuration.metadata import Metadata
 from configuration_engine.configuration.training_schema import TrainingSchema
-from configuration_engine.configuration.tabular_utils import get_best_tabular_config

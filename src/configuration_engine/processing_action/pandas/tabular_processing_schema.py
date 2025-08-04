@@ -1,6 +1,6 @@
 from typing import List, Union, Literal, Dict
 from pydantic import BaseModel
-from configuration_engine.processing_action import (
+from configuration_engine.processing_action.pandas import (
     DropColumn,
     ChangeCategory,
     CategoryToCodes,

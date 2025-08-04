@@ -14,7 +14,7 @@ from configuration_engine.parameter import (
 )
 from configuration_engine.datasets import DatasetSchema
 from pydantic import BaseModel
-from configuration_engine.configuration import (
+from configuration_engine.configuration.pandas import (
     TabularConfiguration,
 )
 from configuration_engine.datasets import PandasDataset
