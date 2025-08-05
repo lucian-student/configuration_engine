@@ -24,7 +24,7 @@ class CSVLogger(Logger):
         """
         if self.first_row():
             self.headers = set(data.keys())
-            self.writer().writerow(data.keys())
+            self.writer().writerow(self.headers)
             self.set_first_row(False)
 
         keys = set(data.keys())

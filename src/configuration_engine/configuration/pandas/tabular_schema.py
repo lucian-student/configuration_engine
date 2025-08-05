@@ -1,5 +1,5 @@
 from pydantic import Field
-from configuration_engine.processing_action import (
+from configuration_engine.processing_action.pandas import (
     TabularColumnActionSchema,
     TabularProcessingAction,
 )
