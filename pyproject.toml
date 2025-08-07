@@ -1,6 +1,6 @@
 [project]
 name = "configuration_engine"
-version = "2.2.1"
+version = "2.2.2"
 description = "Configuration engine for machine learning"
 readme = "README.md"
 license = { text = "MIT" }
