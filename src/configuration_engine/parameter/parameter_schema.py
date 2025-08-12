@@ -15,7 +15,7 @@ class BaseParameter[T](BaseModel, ABC):
 
 
 class LiteralParameterSchema[T: (int, float, str, bool)](BaseParameter[T]):
-    values: list[str]
+    values: list[T]
 
     def build(self, name: str, alias: Optional[str] = None) -> LiteralParameter[T]:
         return LiteralParameter(name=name, alias=alias, values=self.values)
