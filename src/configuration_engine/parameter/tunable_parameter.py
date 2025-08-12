@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Literal
 from optuna import Trial
 
 
@@ -38,6 +38,25 @@ class ConstantParameter[T](Parameter[T]):
 
     def first(self) -> T:
         return self.value
+
+
+class LiteralParameter[T: (int, float, str, bool)](Parameter[T]):
+
+    def __init__(self, name: str, values: list[T], alias: Optional[str] = None):
+        super().__init__(name, alias)
+        self.values = values
+
+    def suggest(self, trial: Trial):
+        index = trial.suggest_int(
+            name=self.alias,
+            low=0,
+            high=len(self.values) - 1,
+        )
+        return self.values[index]
+
+    def first(self):
+        return self.values[0]
+
 
 class RangeParameter[T: (int, float)](Parameter[T]):
 
