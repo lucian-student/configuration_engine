@@ -1,0 +1,1 @@
+from configuration_engine.utils.functional import resolve_function

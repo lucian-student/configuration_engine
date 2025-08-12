@@ -18,3 +18,4 @@ class TestLiteralParameterSchema:
         assert param.name == "size"
         assert param.alias == "custom_size"
         assert param.values == ["small", "medium", "large"]
+
