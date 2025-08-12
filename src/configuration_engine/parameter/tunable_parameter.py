@@ -40,7 +40,7 @@ class ConstantParameter[T](Parameter[T]):
         return self.value
 
 
-class CallableParameter[T: Callable](Parameter[T]):
+class CallableParameter(Parameter[Callable]):
 
     def __init__(
         self, name: str, callables: list[Callable], alias: Optional[str] = None

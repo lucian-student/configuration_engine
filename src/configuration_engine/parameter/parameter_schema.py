@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Callable
 from configuration_engine.parameter.tunable_parameter import (
     RangeParameter,
     LiteralParameter,
@@ -16,17 +16,19 @@ class BaseParameter[T](BaseModel, ABC):
         pass
 
 
-class LiteralParameterSchema[T: (int, float, str, bool)](BaseParameter[T]):
+class LiteralParameterSchema[T: (int, float, str, bool)](
+    BaseParameter[LiteralParameter[T]]
+):
     values: list[T]
 
     def build(self, name: str, alias: Optional[str] = None) -> LiteralParameter[T]:
         return LiteralParameter(name=name, alias=alias, values=self.values)
 
 
-class CallableParameterSchema[T](BaseParameter[T]):
+class CallableParameterSchema(BaseParameter[CallableParameter]):
     callable: str | list[str]
 
-    def build(self, name: str, alias: Optional[str] = None):
+    def build(self, name: str, alias: Optional[str] = None) -> CallableParameter:
         if isinstance(self.callable, str):
             converted_callables = [resolve_function(self.callable)]
         elif isinstance(self.callable, list) and all(
