@@ -9,6 +9,10 @@ from abc import ABC, abstractmethod
 from configuration_engine.utils import resolve_function
 
 
+class Tunable:
+    pass
+
+
 class BaseParameter[T](BaseModel, ABC):
 
     @abstractmethod

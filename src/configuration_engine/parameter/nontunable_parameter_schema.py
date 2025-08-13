@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from abc import ABC, abstractmethod
 
+class Nontunable:
+    pass
 
 class BaseNontunableParameter[T](BaseModel, ABC):
 
