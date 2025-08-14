@@ -191,6 +191,9 @@ class MultiParameter[T](Parameter[T]):
         )
         return self.parameters[index].suggest(trial)
 
+    def first(self):
+        return self.parameters[0]
+
     def __eq__(self, other: Any):
         if not isinstance(other, MultiParameter):
             return False
