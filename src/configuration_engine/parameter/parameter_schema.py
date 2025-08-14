@@ -18,9 +18,9 @@ class BaseParameter[T](BaseModel, ABC):
     @abstractmethod
     def build(self, name: str, alias: Optional[str] = None) -> T:
         pass
+        
 
-
-class LiteralParameterSchema[T: (int, float, str, bool)](
+class LiteralParameterSchema[T: (int | float | str | bool)](
     BaseParameter[LiteralParameter[T]]
 ):
     values: list[T]

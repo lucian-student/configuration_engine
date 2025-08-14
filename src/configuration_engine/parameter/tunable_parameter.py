@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 from optuna import Trial
+import math
 
 
 class Parameter[T](ABC):
@@ -26,6 +27,10 @@ class Parameter[T](ABC):
         """
         pass
 
+    @abstractmethod
+    def __eq__(self, other: Any):
+        pass
+
 
 class ConstantParameter[T](Parameter[T]):
 
@@ -38,6 +43,18 @@ class ConstantParameter[T](Parameter[T]):
 
     def first(self) -> T:
         return self.value
+
+    def __eq__(self, other: Any):
+        if not isinstance(other, ConstantParameter):
+            return False
+        if type(self.value) != type(other.value):
+            return False
+        if isinstance(self.value, float):
+            value_condition = math.isclose(self.value, other.value)
+        else:
+            value_condition = self.value == other.value
+        base_condition = self.name == other.name and self.alias == other.alias
+        return base_condition and value_condition
 
 
 class CallableParameter(Parameter[Callable]):
@@ -59,8 +76,17 @@ class CallableParameter(Parameter[Callable]):
     def first(self):
         return self.callables[0]
 
+    def __eq__(self, other: Any):
+        if not isinstance(other, CallableParameter):
+            return False
+        return (
+            self.name == other.name
+            and self.alias == other.alias
+            and self.callables == other.callables
+        )
 
-class LiteralParameter[T: (int, float, str, bool)](Parameter[T]):
+
+class LiteralParameter[T: (int | float | str | bool)](Parameter[T]):
 
     def __init__(self, name: str, values: list[T], alias: Optional[str] = None):
         super().__init__(name, alias)
@@ -76,6 +102,21 @@ class LiteralParameter[T: (int, float, str, bool)](Parameter[T]):
 
     def first(self):
         return self.values[0]
+
+    def __eq__(self, other: Any):
+        """
+        Probably wont work well for literal, that is of type float
+        """
+        if not isinstance(other, LiteralParameter):
+            return False
+        for curr_el, other_el in zip(self.values, other.values):
+            if type(curr_el) != type(other_el):
+                return False
+            if isinstance(curr_el, float) and not math.isclose(curr_el, other_el):
+                return False
+            if curr_el != other_el:
+                return False
+        return self.name == other.name and self.alias == other.alias
 
 
 class RangeParameter[T: (int, float)](Parameter[T]):
@@ -110,3 +151,22 @@ class RangeParameter[T: (int, float)](Parameter[T]):
 
     def first(self):
         return self.min
+
+    def __eq__(self, other: Any):
+        if not isinstance(other, RangeParameter):
+            return False
+        return (
+            self.name == other.name
+            and self.alias == other.alias
+            and math.isclose(self.min, other.min)
+            and math.isclose(self.max, other.max)
+            and (
+                (self.step is None and other.step is None)
+                or (
+                    self.step is not None
+                    and other.step is not None
+                    and math.isclose(self.step, other.step)
+                )
+            )
+            and self.log == other.log
+        )

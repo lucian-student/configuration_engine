@@ -35,9 +35,9 @@ class BasicSchema(BaseSchema):
 class TunableSchema(BaseSchema):
 
     def build(self):
-        data = self.model_dump()
         transformed_data: dict[str, Parameter[Any]] = {}
-        for param_name, param_schema in data.items():
+        for param_name in self.__pydantic_fields__:
+            param_schema = getattr(self, param_name)
             if isinstance(param_schema, BaseParameter):
                 transformed_data[param_name] = param_schema.build(name=param_name)
             else:
@@ -49,9 +49,9 @@ class TunableSchema(BaseSchema):
 
 class NonTunableSchema(BaseSchema):
     def build(self):
-        data = self.model_dump()
-        transformed_data: dict[str, Parameter[Any]] = {}
-        for param_name, param_schema in data.items():
+        transformed_data: list[str, NontunableParameter[Any]] = {}
+        for param_name in self.__pydantic_fields__:
+            param_schema = getattr(self, param_name)
             if isinstance(param_schema, BaseNontunableParameter):
                 transformed_data[param_name] = param_schema.build(name=param_name)
             else:
