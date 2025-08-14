@@ -104,7 +104,7 @@ class Configuration:
         if key not in self.data:
             raise ValueError(
                 f"{MODULE_NAME}:{self.__class__}",
-                "suggest",
+                "construct",
                 f"Key {key} isn't present!",
             )
         values = self.data[key]
@@ -113,7 +113,7 @@ class Configuration:
         if not isinstance(values, dict):
             raise ValueError(
                 f"{MODULE_NAME}:{self.__class__}",
-                "suggest",
+                "construct",
                 f"Key {key} type isn't supported key should be parameter dict or basic schema!",
             )
         constructed_values: dict[str, Any] = {}
@@ -126,6 +126,36 @@ class Configuration:
                 raise ValueError(
                     f"{MODULE_NAME}:{self.__class__}",
                     "suggest",
+                    f"Dict should only contain {Parameter} or {NontunableParameter}!",
+                )
+        return constructed_values
+
+    def yaml(self, key: str) -> dict[str, Any]:
+        if key not in self.data:
+            raise ValueError(
+                f"{MODULE_NAME}:{self.__class__}",
+                "yaml",
+                f"Key {key} isn't present!",
+            )
+        values = self.data[key]
+        if isinstance(values, BasicSchema):
+            return values.model_dump()
+        if not isinstance(values, dict):
+            raise ValueError(
+                f"{MODULE_NAME}:{self.__class__}",
+                "yaml",
+                f"Key {key} type isn't supported key should be parameter dict or basic schema!",
+            )
+        constructed_values: dict[str, Any] = {}
+        for parameter_name, parameter in values.items():
+            if isinstance(parameter, NontunableParameter):
+                constructed_values[parameter_name] = parameter.value()
+            elif isinstance(parameter, Parameter):
+                constructed_values[parameter_name] = parameter.yaml()
+            else:
+                raise ValueError(
+                    f"{MODULE_NAME}:{self.__class__}",
+                    "yaml",
                     f"Dict should only contain {Parameter} or {NontunableParameter}!",
                 )
         return constructed_values
@@ -181,7 +211,7 @@ class SmartSchema(BaseModel, ABC):
         transformed_data: ConfigurationDict = {}
         for name, field in cls.__pydantic_fields__.items():
             metadata = field.metadata
-            current_value = getattr(self,name)
+            current_value = getattr(self, name)
             contains_tunable = any(isinstance(item, Tunable) for item in metadata)
             contains_nontunable = any(isinstance(item, Nontunable) for item in metadata)
             if isinstance(current_value, dict):

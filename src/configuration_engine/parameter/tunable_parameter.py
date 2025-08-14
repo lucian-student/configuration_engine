@@ -23,9 +23,12 @@ class Parameter[T](ABC):
     @abstractmethod
     def first(self) -> T:
         """
-        Returns first possible value
+        Returns last suggested value
         """
         pass
+
+    def yaml(self):
+        return self.first()
 
     @abstractmethod
     def __eq__(self, other: Any):
@@ -60,21 +63,27 @@ class ConstantParameter[T](Parameter[T]):
 class ClassCallableParameter(Parameter[Callable]):
 
     def __init__(
-        self, name: str, callables: list[Callable], alias: Optional[str] = None
+        self,
+        name: str,
+        callables: list[Callable],
+        alias: Optional[str] = None,
     ):
         super().__init__(name, alias)
         self.callables = callables
+        self.index: int | None = None
 
     def suggest(self, trial: Trial):
-        index = trial.suggest_int(
+        self.index = trial.suggest_int(
             name=self.alias,
             low=0,
             high=len(self.callables) - 1,
         )
-        return self.callables[index]
+        return self.callables[self.index]
 
     def first(self):
-        return self.callables[0]
+        if self.index is None:
+            return self.callables[0]
+        return self.callables[self.index]
 
     def __eq__(self, other: Any):
         if not isinstance(other, ClassCallableParameter):
@@ -85,23 +94,31 @@ class ClassCallableParameter(Parameter[Callable]):
             and self.callables == other.callables
         )
 
+    def yaml(self):
+        return {
+            "callable_class": f"{self.__class__.__module__}.{self.__class__.__name__}"
+        }
+
 
 class LiteralParameter[T: (int | float | str | bool)](Parameter[T]):
 
     def __init__(self, name: str, values: list[T], alias: Optional[str] = None):
         super().__init__(name, alias)
         self.values = values
+        self.index: int | None = None
 
     def suggest(self, trial: Trial):
-        index = trial.suggest_int(
+        self.index = trial.suggest_int(
             name=self.alias,
             low=0,
             high=len(self.values) - 1,
         )
-        return self.values[index]
+        return self.values[self.index]
 
     def first(self):
-        return self.values[0]
+        if self.index is None:
+            return self.values[0]
+        return self.values[self.index]
 
     def __eq__(self, other: Any):
         """
@@ -135,21 +152,28 @@ class RangeParameter[T: (int, float)](Parameter[T]):
         self.max = max
         self.log = log
         self.step = step
+        self.suggested: T | None = None
+        self.was_suggested: bool = False
 
     def suggest(self, trial: Trial) -> T:
+        self.was_suggested = True
         if isinstance(self.min, int):
-            return trial.suggest_int(
+            self.suggested = trial.suggest_int(
                 self.alias,
                 low=self.min,
                 high=self.max,
                 log=self.log,
                 step=self.step if self.step is not None else 1,
             )
-        return trial.suggest_float(
+            return self.suggested
+        self.suggested = trial.suggest_float(
             self.alias, low=self.min, high=self.max, step=self.step, log=self.log
         )
+        return self.suggested
 
     def first(self):
+        if self.was_suggested:
+            return self.suggested
         return self.min
 
     def __eq__(self, other: Any):
@@ -182,17 +206,20 @@ class MultiParameter[T](Parameter[T]):
     ):
         super().__init__(name, alias)
         self.parameters = parameters
+        self.index: int | None = None
 
     def suggest(self, trial: Trial) -> T:
-        index = trial.suggest_int(
+        self.index = trial.suggest_int(
             name=self.alias,
             low=0,
             high=len(self.parameters) - 1,
         )
-        return self.parameters[index].suggest(trial)
+        return self.parameters[self.index].suggest(trial)
 
     def first(self):
-        return self.parameters[0]
+        if self.index is None:
+            return self.parameters[0]
+        return self.parameters[self.index].first()
 
     def __eq__(self, other: Any):
         if not isinstance(other, MultiParameter):
