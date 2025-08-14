@@ -95,8 +95,9 @@ class ClassCallableParameter(Parameter[Callable]):
         )
 
     def yaml(self):
+        obj = self.first()
         return {
-            "callable_class": f"{self.__class__.__module__}.{self.__class__.__name__}"
+            "callable_class": f"{obj.__class__.__module__}.{obj.__class__.__name__}"
         }
 
 
