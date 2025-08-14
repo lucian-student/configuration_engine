@@ -1,8 +1,12 @@
 import importlib
 from types import ModuleType
 from typing import Optional, Iterable
+import inspect
 
-def resolve_function(path: str, allowed_modules: Optional[Iterable[str]] = None):
+
+def resolve_function(
+    path: str, allowed_modules: Optional[Iterable[str]] = None, class_only: bool = True
+):
     """
     Convert a string like 'math.sqrt' or 'my_module.my_func' into a callable.
     Only allows functions from explicitly whitelisted modules if provided.
@@ -22,10 +26,14 @@ def resolve_function(path: str, allowed_modules: Optional[Iterable[str]] = None)
     try:
         func = getattr(module, func_name)
     except AttributeError:
-        raise AttributeError(f"Function '{func_name}' not found in module '{module_path}'.")
+        raise AttributeError(
+            f"Function '{func_name}' not found in module '{module_path}'."
+        )
 
     if not callable(func):
-        raise TypeError(f"'{func_name}' in module '{module_path}' is not callable.")
+        raise TypeError(f"'{func_name}' in module '{module_path}' is not function.")
+
+    if class_only and not inspect.isclass(func):
+        raise ValueError("Class only flag allows only callable classes!")
 
     return func
-

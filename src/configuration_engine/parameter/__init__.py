@@ -2,7 +2,7 @@ from configuration_engine.parameter.parameter_schema import (
     RangeParameterSchema,
     BaseParameter,
     LiteralParameterSchema,
-    CallableParameterSchema,
+    ClassCallableSchema,
     Tunable,
     MultiParameterSchema,
     MultiFloatRangeSchema,
@@ -13,7 +13,7 @@ from configuration_engine.parameter.tunable_parameter import (
     RangeParameter,
     ConstantParameter,
     LiteralParameter,
-    CallableParameter,
+    ClassCallableParameter,
     MultiParameter,
 )
 

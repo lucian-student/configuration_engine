@@ -2,7 +2,7 @@ from typing import Optional, Callable
 from configuration_engine.parameter.tunable_parameter import (
     RangeParameter,
     LiteralParameter,
-    CallableParameter,
+    ClassCallableParameter,
     MultiParameter,
     Parameter,
 )
@@ -31,17 +31,21 @@ class LiteralParameterSchema[T: (int | float | str | bool)](
         return LiteralParameter(name=name, alias=alias, values=self.values)
 
 
-class CallableParameterSchema(BaseParameter[CallableParameter]):
-    callable: str | list[str]
+class ClassCallableSchema(BaseParameter[ClassCallableParameter]):
+    callable_class: str | list[str]
 
-    def build(self, name: str, alias: Optional[str] = None) -> CallableParameter:
-        if isinstance(self.callable, str):
-            converted_callables = [resolve_function(self.callable)]
-        elif isinstance(self.callable, list) and all(
-            isinstance(item, str) for item in self.callable
+    def build(self, name: str, alias: Optional[str] = None) -> ClassCallableParameter:
+        if isinstance(self.callable_class, str):
+            converted_callables = [resolve_function(self.callable_class)()]
+        elif isinstance(self.callable_class, list) and all(
+            isinstance(item, str) for item in self.callable_class
         ):
-            converted_callables = [resolve_function(fn) for fn in self.callable]
-        return CallableParameter(name=name, callables=converted_callables, alias=alias)
+            converted_callables = [
+                resolve_function(fn)() for fn in self.callable_class
+            ]
+        return ClassCallableParameter(
+            name=name, callables=converted_callables, alias=alias
+        )
 
 
 class RangeParameterSchema[RangeType: (int, float)](

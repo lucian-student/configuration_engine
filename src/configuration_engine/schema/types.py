@@ -1,12 +1,12 @@
 from configuration_engine.parameter import (
-    CallableParameterSchema,
+    ClassCallableSchema,
     RangeParameterSchema,
     LiteralParameterSchema,
 )
 
 TunableDictSchema = dict[
     str,
-    CallableParameterSchema
+    ClassCallableSchema
     | RangeParameterSchema[int]
     | RangeParameterSchema[float]
     | LiteralParameterSchema[int | float | str | bool]

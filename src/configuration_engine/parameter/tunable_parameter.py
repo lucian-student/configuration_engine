@@ -57,7 +57,7 @@ class ConstantParameter[T](Parameter[T]):
         return base_condition and value_condition
 
 
-class CallableParameter(Parameter[Callable]):
+class ClassCallableParameter(Parameter[Callable]):
 
     def __init__(
         self, name: str, callables: list[Callable], alias: Optional[str] = None
@@ -77,7 +77,7 @@ class CallableParameter(Parameter[Callable]):
         return self.callables[0]
 
     def __eq__(self, other: Any):
-        if not isinstance(other, CallableParameter):
+        if not isinstance(other, ClassCallableParameter):
             return False
         return (
             self.name == other.name
