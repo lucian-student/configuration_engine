@@ -190,3 +190,12 @@ class MultiParameter[T](Parameter[T]):
             high=len(self.parameters) - 1,
         )
         return self.parameters[index].suggest(trial)
+
+    def __eq__(self, other: Any):
+        if not isinstance(other, MultiParameter):
+            return False
+        return (
+            self.name == other.name
+            and self.alias == other.alias
+            and self.parameters == other.parameters
+        )
