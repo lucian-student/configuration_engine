@@ -75,6 +75,11 @@ class Configuration:
     def __init__(self, data: ConfigurationDict):
         self.data = data
 
+    def __eq__(self, other: Any):
+        if not isinstance(other, Configuration):
+            return False
+        return self.data == other.data
+
     def __getitem__(self, key: str) -> Any:
         if key not in self.data:
             raise ValueError(

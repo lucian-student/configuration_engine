@@ -7,6 +7,8 @@ from configuration_engine.schema import (
     SmartSchema,
     ConfigurationEntry,
     ConfigurationDict,
+    TunableDictSchema,
+    NonTunableDictSchema,
 )
 from configuration_engine.parameter import (
     LiteralParameterSchema,
@@ -15,8 +17,10 @@ from configuration_engine.parameter import (
     RangeParameter,
     ConstantParameter,
     ConstantNontunableParameter,
+    Tunable,
+    Nontunable,
 )
-from typing import Literal
+from typing import Literal, Annotated
 from unittest.mock import MagicMock
 import pytest
 
@@ -139,10 +143,53 @@ class TestConfiguration:
 
 
 class DummySmartSchema(SmartSchema):
-    pass
+    tunable_dict: Annotated[TunableDictSchema, Tunable()]
+    nontunable_dict: Annotated[NonTunableDictSchema, Nontunable()]
+    basic: DummyBasicSchema
+    tunable: DummyTunableSchema
+    nontunable: DummyNonTunableSchema
+
+
+@pytest.fixture
+def smart_schema_data():
+    return {
+        "tunable_dict": {
+            "age": {
+                "min": 0,
+                "max": 24,
+            }
+        },
+        "nontunable_dict": {"age": 24},
+        "basic": {"name": "peter", "surename": "karel"},
+        "tunable": {"weather_type": {"values": ["good", "bad"]}, "temperature": 10.0},
+        "nontunable": {"weather_type": "good", "temperature": 10.0},
+    }
 
 
 class TestSmartSchema:
 
-    def test_build_configuration(self):
-        pass
+    def test_build_configuration(self, smart_schema_data: dict):
+        schema = DummySmartSchema(**smart_schema_data)
+        config = schema.build_configuration()
+        return config == Configuration(
+            {
+                "tunable_dict": {
+                    "age": RangeParameter(
+                        name="age", min=0, max=24, log=False, step=None
+                    )
+                },
+                "nontunable_dict": {
+                    "age": ConstantNontunableParameter(name="age", value=24)
+                },
+                "basic": BasicSchema(**{"name": "peter", "surename": "karel"}),
+                "tunable": DummyTunableSchema(
+                    **{
+                        "weather_type": {"values": ["good", "bad"]},
+                        "temperature": 10.0,
+                    }
+                ),
+                "nontunable": DummyNonTunableSchema(
+                    **{"weather_type": "good", "temperature": 10.0}
+                ),
+            }
+        )
