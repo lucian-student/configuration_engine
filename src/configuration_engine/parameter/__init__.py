@@ -4,6 +4,9 @@ from configuration_engine.parameter.parameter_schema import (
     LiteralParameterSchema,
     CallableParameterSchema,
     Tunable,
+    MultiParameterSchema,
+    MultiFloatRangeSchema,
+    MultiIntRangeSchema,
 )
 from configuration_engine.parameter.tunable_parameter import (
     Parameter,
@@ -11,6 +14,7 @@ from configuration_engine.parameter.tunable_parameter import (
     ConstantParameter,
     LiteralParameter,
     CallableParameter,
+    MultiParameter,
 )
 
 from configuration_engine.parameter.nontunable_parameter import (
