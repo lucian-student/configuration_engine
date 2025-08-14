@@ -170,3 +170,23 @@ class RangeParameter[T: (int, float)](Parameter[T]):
             )
             and self.log == other.log
         )
+
+
+class MultiParameter[T](Parameter[T]):
+
+    def __init__(
+        self,
+        name: str,
+        parameters: list[Parameter[T]],
+        alias: Optional[str] = None,
+    ):
+        super().__init__(name, alias)
+        self.parameters = parameters
+
+    def suggest(self, trial: Trial) -> T:
+        index = trial.suggest_int(
+            name=self.alias,
+            low=0,
+            high=len(self.parameters) - 1,
+        )
+        return self.parameters[index].suggest(trial)

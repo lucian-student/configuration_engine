@@ -3,6 +3,8 @@ from configuration_engine.parameter.tunable_parameter import (
     RangeParameter,
     LiteralParameter,
     CallableParameter,
+    MultiParameter,
+    Parameter,
 )
 from pydantic import BaseModel
 from abc import ABC, abstractmethod
@@ -18,7 +20,7 @@ class BaseParameter[T](BaseModel, ABC):
     @abstractmethod
     def build(self, name: str, alias: Optional[str] = None) -> T:
         pass
-        
+
 
 class LiteralParameterSchema[T: (int | float | str | bool)](
     BaseParameter[LiteralParameter[T]]
@@ -61,3 +63,28 @@ class RangeParameterSchema[RangeType: (int, float)](
             step=self.step,
             log=self.log,
         )
+
+
+class MultiParameterSchema[SCHEMA: (BaseParameter), PARAM: (Parameter)](
+    BaseParameter[MultiParameter[PARAM]]
+):
+    parameters: list[SCHEMA]
+
+    def build(self, name: str, alias: Optional[str] = None):
+        alias = alias or name
+        return MultiParameter(
+            name=name,
+            parameters=[
+                s.build(name=f"{name}_{i}", alias=f"{alias}_{i}")
+                for i, s in enumerate(self.parameters)
+            ],
+            alias=alias,
+        )
+
+
+MultiFloatRangeSchema = MultiParameterSchema[
+    RangeParameterSchema[float], RangeParameter[float]
+]
+MultiIntRangeSchema = MultiParameterSchema[
+    RangeParameterSchema[int], RangeParameter[int]
+]

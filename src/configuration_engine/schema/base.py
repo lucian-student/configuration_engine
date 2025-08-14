@@ -22,33 +22,36 @@ from configuration_engine.constants import *
 class BaseSchema(BaseModel, ABC):
 
     @abstractmethod
-    def build(self) -> Any:
+    def build(self, prefix: str = "") -> Any:
         pass
 
 
 class BasicSchema(BaseSchema):
 
-    def build(self):
+    def build(self, prefix: str = ""):
         return self
 
 
 class TunableSchema(BaseSchema):
 
-    def build(self):
+    def build(self, prefix: str | None = None):
         transformed_data: dict[str, Parameter[Any]] = {}
         for param_name in self.__pydantic_fields__:
             param_schema = getattr(self, param_name)
+            alias = f"{prefix}_{param_name}" if prefix is not None else param_name
             if isinstance(param_schema, BaseParameter):
-                transformed_data[param_name] = param_schema.build(name=param_name)
+                transformed_data[param_name] = param_schema.build(
+                    name=param_name, alias=alias
+                )
             else:
                 transformed_data[param_name] = ConstantParameter(
-                    name=param_name, value=param_schema
+                    name=param_name, alias=alias, value=param_schema
                 )
         return transformed_data
 
 
 class NonTunableSchema(BaseSchema):
-    def build(self):
+    def build(self, prefix: str = ""):
         transformed_data: list[str, NontunableParameter[Any]] = {}
         for param_name in self.__pydantic_fields__:
             param_schema = getattr(self, param_name)
@@ -175,11 +178,10 @@ class SmartSchema(BaseModel, ABC):
         Raise:
         """
         cls = self.__class__
-        data = self.model_dump()
         transformed_data: ConfigurationDict = {}
         for name, field in cls.__pydantic_fields__.items():
             metadata = field.metadata
-            current_value = data[name]
+            current_value = getattr(self,name)
             contains_tunable = any(isinstance(item, Tunable) for item in metadata)
             contains_nontunable = any(isinstance(item, Nontunable) for item in metadata)
             if isinstance(current_value, dict):
@@ -188,11 +190,13 @@ class SmartSchema(BaseModel, ABC):
                     for param_name, param_schema in current_value.items():
                         if isinstance(param_schema, BaseParameter):
                             transformed_value[param_name] = param_schema.build(
-                                name=param_name
+                                name=param_name, alias=f"{name}_{param_name}"
                             )
                         else:
                             transformed_value[param_name] = ConstantParameter(
-                                name=param_name, value=param_schema
+                                name=param_name,
+                                alias=f"{name}_{param_name}",
+                                value=param_schema,
                             )
                     transformed_data[name] = transformed_value
                 elif contains_nontunable:
@@ -209,7 +213,7 @@ class SmartSchema(BaseModel, ABC):
                 else:
                     transformed_data[name] = current_value
             elif isinstance(current_value, BaseSchema):
-                transformed_data[name] = current_value.build()
+                transformed_data[name] = current_value.build(prefix=name)
             else:
                 transformed_data[name] = current_value
         return Configuration(transformed_data)

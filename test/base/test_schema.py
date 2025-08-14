@@ -171,25 +171,31 @@ class TestSmartSchema:
     def test_build_configuration(self, smart_schema_data: dict):
         schema = DummySmartSchema(**smart_schema_data)
         config = schema.build_configuration()
-        return config == Configuration(
+        reference_config = Configuration(
             {
                 "tunable_dict": {
                     "age": RangeParameter(
-                        name="age", min=0, max=24, log=False, step=None
+                        name="age",
+                        alias="tunable_dict_age",
+                        min=0,
+                        max=24,
+                        log=False,
+                        step=None,
                     )
                 },
                 "nontunable_dict": {
                     "age": ConstantNontunableParameter(name="age", value=24)
                 },
-                "basic": BasicSchema(**{"name": "peter", "surename": "karel"}),
+                "basic": DummyBasicSchema(**{"name": "peter", "surename": "karel"}),
                 "tunable": DummyTunableSchema(
                     **{
                         "weather_type": {"values": ["good", "bad"]},
                         "temperature": 10.0,
                     }
-                ),
+                ).build(prefix="tunable"),
                 "nontunable": DummyNonTunableSchema(
                     **{"weather_type": "good", "temperature": 10.0}
-                ),
+                ).build(),
             }
         )
+        assert config.data == reference_config.data
