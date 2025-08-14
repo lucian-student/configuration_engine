@@ -62,7 +62,7 @@ class NonTunableSchema(BaseSchema):
 
 
 ConfigurationEntry = (
-    Any | BasicSchema | dict[str, Parameter[Any]] | dict[str, NontunableParameter[Any]]
+    BasicSchema | dict[str, Parameter[Any]] | dict[str, NontunableParameter[Any]]
 )
 ConfigurationDict = dict[str, ConfigurationEntry]
 
@@ -84,7 +84,7 @@ class Configuration:
             )
         return self.data[key]
 
-    def construct(self, key: str) -> dict[Any]:
+    def construct(self, key: str) -> dict[str, Any]:
         """
         This value contructs parameter dict:
         * for BasicSchema it model_dumps()
@@ -102,12 +102,24 @@ class Configuration:
         values = self.data[key]
         if isinstance(values, BasicSchema):
             return values.model_dump()
+        if not isinstance(values, dict):
+            raise ValueError(
+                f"{MODULE_NAME}:{self.__class__}",
+                "suggest",
+                f"Key {key} type isn't supported key should be parameter dict or basic schema!",
+            )
         constructed_values: dict[str, Any] = {}
         for parameter_name, parameter in values.items():
             if isinstance(parameter, NontunableParameter):
                 constructed_values[parameter_name] = parameter.value()
             elif isinstance(parameter, Parameter):
                 constructed_values[parameter_name] = parameter.first()
+            else:
+                raise ValueError(
+                    f"{MODULE_NAME}:{self.__class__}",
+                    "suggest",
+                    f"Dict should only contain {Parameter} or {NontunableParameter}!",
+                )
         return constructed_values
 
     def suggest(self, key: str, trial: optuna.Trial) -> dict[Any]:
