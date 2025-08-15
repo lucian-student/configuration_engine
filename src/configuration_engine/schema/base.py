@@ -17,6 +17,7 @@ from typing import Any
 import optuna
 from configuration_engine import error_message
 from configuration_engine.constants import *
+import yaml
 
 
 class BaseSchema(BaseModel, ABC):
@@ -201,6 +202,19 @@ class SmartSchema(BaseModel, ABC):
     This class alows to automatically convert schema dicts to parameters.
     Or parameters, that are of type TunableSchema or NontunableSchema
     """
+
+    @staticmethod
+    def load_config(config: str) -> Configuration:
+        """
+        Maybe for test purposes i should, also support stream not just path
+        Raises:
+            OSError: if rading config fails
+            pydantic.ValidationError: if schema fails to parse
+        """
+        with open(config, "r") as config_stream:
+            data = yaml.load(config_stream, Loader=yaml.FullLoader)
+        schema = SmartSchema(**data)
+        return schema.build_configuration()
 
     def build_configuration(self) -> Configuration:
         """
