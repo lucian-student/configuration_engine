@@ -203,8 +203,8 @@ class SmartSchema(BaseModel, ABC):
     Or parameters, that are of type TunableSchema or NontunableSchema
     """
 
-    @staticmethod
-    def load_config(config: str) -> Configuration:
+    @classmethod
+    def load_config(cls,config: str) -> Configuration:
         """
         Maybe for test purposes i should, also support stream not just path
         Raises:
@@ -213,7 +213,7 @@ class SmartSchema(BaseModel, ABC):
         """
         with open(config, "r") as config_stream:
             data = yaml.load(config_stream, Loader=yaml.FullLoader)
-        schema = SmartSchema(**data)
+        schema = cls(**data)
         return schema.build_configuration()
 
     def build_configuration(self) -> Configuration:
